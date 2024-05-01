@@ -2,7 +2,7 @@ import os
 import argparse
 
 # Generate a directory with random file with .txt extention
-def text_dir_generator(destination, nfile, verbose):
+def text_dir_generator(destination, nfile, verbose, force):
     # Feed the path string to the os path for OS agnostic path
     dir_path = os.path.abspath(destination)
     if verbose:
@@ -13,7 +13,16 @@ def text_dir_generator(destination, nfile, verbose):
         os.mkdir(dir_path)
     except OSError:
         print("Failed to create directory. Directory " + dir_path + " Exist!")
-        return 1
+        if force:
+            if verbose:
+                print("Deleting old directory...")
+            import shutil
+            shutil.rmtree(dir_path)
+            if verbose:
+                print("Deleting complete, creating new directory")
+                os.mkdir(dir_path)
+        else:
+            return 1
     if verbose:
         print(f"Directory {dir_path} created!")
 
@@ -41,12 +50,13 @@ def main():
     parser.add_argument("dir", type=str, help="Receive the destination directory")
     parser.add_argument("-n", nargs='?', type=int, metavar='N', help="The number of file in the directory", default=10)
     parser.add_argument("-v", "--verbose", help="Shows the program log", action="store_true")
+    parser.add_argument("-f", "--force", help="Force the program to create new directory", action="store_true")
 
     # Parse the arguments 
     args = parser.parse_args()
 
     # pass the arguments to the Generator function
-    text_dir_generator(args.dir, args.n, args.verbose)
+    text_dir_generator(args.dir, args.n, args.verbose, args.force)
     
 if __name__ == "__main__":
     main()
